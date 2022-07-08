@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path"
 	"time"
 
@@ -99,6 +100,16 @@ func (ct *cronTab) Install(ctx context.Context, opts ...InstallOpts) (InstalledC
 		return nil, fmt.Errorf("convert to plist: %w", err)
 	}
 
+	cmd := exec.CommandContext(ctx, "launchctl", "load", destination)
+
+	if err := cmd.Run(); err != nil {
+		return nil, fmt.Errorf("load %s: %w", destination, err)
+	}
+
+	if err := cmd.Wait(); err != nil {
+		return nil, fmt.Errorf("wait: %w", err)
+	}
+
 	return &installedCronTab{ct, destination}, nil
 }
 
@@ -170,6 +181,16 @@ func (ct *installedCronTab) Uninstall(ctx context.Context) error {
 	destination, err := ct.destination()
 	if err != nil {
 		return err
+	}
+
+	cmd := exec.CommandContext(ctx, "launchctl", "unload", destination)
+
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("unload %s: %w", destination, err)
+	}
+
+	if err := cmd.Wait(); err != nil {
+		return fmt.Errorf("wait: %w", err)
 	}
 
 	if err := os.Remove(destination); err != nil {
