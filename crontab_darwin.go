@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"time"
@@ -89,13 +88,15 @@ func (ct *cronTab) Install(ctx context.Context, opts ...InstallOpts) (InstalledC
 		return nil, err
 	}
 
-	content, err := ct.ToPlist()
+	f, err := os.OpenFile(destination, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
-		return nil, fmt.Errorf("convert to plist: %w", err)
+		return nil, fmt.Errorf("open %s: %w", destination, err)
 	}
 
-	if err := ioutil.WriteFile(destination, content, 0600); err != nil {
-		return nil, fmt.Errorf("write file %s: %w", destination, err)
+	defer f.Close()
+
+	if err := ct.ToPlist(f); err != nil {
+		return nil, fmt.Errorf("convert to plist: %w", err)
 	}
 
 	return &installedCronTab{ct, destination}, nil
@@ -139,7 +140,7 @@ func (ct *cronTab) destination() (string, error) {
 	return destination, nil
 }
 
-func (ct *cronTab) ToPlist() ([]byte, error) {
+func (ct *cronTab) ToPlist(writer io.Writer) error {
 	agent := &cronEntry{
 		Label:            "crontab",
 		Program:          "/bin/sh",
@@ -148,23 +149,12 @@ func (ct *cronTab) ToPlist() ([]byte, error) {
 		StartInterval:    1,
 	}
 
-	reader, writer := io.Pipe()
-	go func(writer *io.PipeWriter) {
-		var err error
-		defer func() {
-			_ = writer.CloseWithError(err)
-		}()
-
-		encoder := plist.NewEncoder(writer)
-		err = encoder.Encode(agent)
-	}(writer)
-
-	result, err := ioutil.ReadAll(reader)
-	if err != nil {
-		return nil, fmt.Errorf("read: %w", err)
+	encoder := plist.NewEncoder(writer)
+	if err := encoder.Encode(agent); err != nil {
+		return fmt.Errorf("encode agent: %w", err)
 	}
 
-	return result, nil
+	return nil
 }
 
 type installedCronTab struct {
