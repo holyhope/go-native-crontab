@@ -1,4 +1,4 @@
-module github.com/holyhope/god
+module github.com/holyhope/god/v1
 
 go 1.18
 
