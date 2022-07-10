@@ -1,51 +1,43 @@
-package crontab_test
+package god_test
 
 import (
 	"context"
 
-	crontab "github.com/holyhope/go-native-crontab"
+	god "github.com/holyhope/god"
 )
 
-func ExampleFileName() {
-	ct, _ := crontab.New(context.Background())
-
-	ict, err := ct.Install(
+func ExampleUnitName() {
+	u, _ := god.New(
 		context.Background(),
-		crontab.FileName("com.github.holyhope.crontab_example"),
+		god.UnitName("com.github.holyhope.god_example"),
 	)
 
-	if err == nil {
-		// Cleanup filesystem
-		ict.Uninstall(context.Background())
-	}
+	_ = u.Install(context.Background())
+
+	// Cleanup filesystem
+	_ = u.Uninstall(context.Background())
 }
 
-func ExampleUserScope() {
-	ct, _ := crontab.New(
+func ExampleScopeUser() {
+	u, _ := god.New(
 		context.Background(),
-		crontab.UserScope,
+		god.ScopeUser,
 	)
 
-	ict, err := ct.Install(
-		context.Background(),
-	)
-	if err == nil {
-		// Cleanup filesystem
-		ict.Uninstall(context.Background())
-	}
+	_ = u.Install(context.Background())
+
+	// Cleanup filesystem
+	_ = u.Uninstall(context.Background())
 }
 
-func ExampleSystemScope() {
-	ct, _ := crontab.New(
+func ExampleScopeSystem() {
+	u, _ := god.New(
 		context.Background(),
-		crontab.SystemScope,
+		god.ScopeSystem,
 	)
 
-	ict, err := ct.Install(
-		context.Background(),
-	)
-	if err == nil {
-		// Cleanup filesystem
-		ict.Uninstall(context.Background())
-	}
+	_ = u.Install(context.Background())
+
+	// Cleanup filesystem
+	_ = u.Uninstall(context.Background())
 }

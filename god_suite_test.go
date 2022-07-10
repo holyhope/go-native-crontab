@@ -1,4 +1,4 @@
-package crontab_test
+package god_test
 
 import (
 	"testing"

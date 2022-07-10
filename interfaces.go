@@ -1,33 +1,31 @@
-package crontab
+package god
 
-import (
-	"context"
-	"time"
-)
+import "context"
 
-// CronTab is a crontab.
-type CronTab interface {
-	// Add adds a new cron entry to the crontab.
-	Add(context.Context, time.Duration, string, ...string) error
-	// Install installs the crontab to the current system.
-	Install(context.Context, ...InstallOpts) (InstalledCronTab, error)
-}
-
-// InstalledCronTab is a crontab that has been installed to the current system.
-type InstalledCronTab interface {
-	// Remove removes the crontab from the current system.
-	Uninstall(context.Context) error
-	Path() string
+// Unit represents single service managed by either systemd or launchd.
+type Unit interface {
+	// Name is the name of the unit.
+	Name() string
+	// Description is the description of the unit.
+	Description() string
+	// Type is the type of the unit.
+	Type() string
+	// State is the state of the unit.
+	State() string
+	// Command is the command of the unit.
+	Command() []string
+	// Envs is the environment variables of the unit.
+	Envs() map[string]string
+	// Scope is the scope of the unit.
+	Scope() UnitScope
+	// Install the unit to the system.
+	Install(ctx context.Context) error
+	// Uninstall the unit from the system.
+	Uninstall(ctx context.Context) error
 }
 
 // FactoryOpts is an option for installing a crontab.
 type FactoryOpts interface {
 	// Apply applies the install options to the crontab.
-	Apply(context.Context, CronTab) (CronTab, error)
-}
-
-// InstallOpts is an option for installing a crontab.
-type InstallOpts interface {
-	// Apply applies the install options to the crontab.
-	Apply(context.Context, CronTab) (CronTab, error)
+	Apply(context.Context, Unit) error
 }

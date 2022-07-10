@@ -1,4 +1,4 @@
-module github.com/holyhope/go-native-crontab
+module github.com/holyhope/god
 
 go 1.18
 
