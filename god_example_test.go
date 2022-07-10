@@ -24,8 +24,8 @@ func ExampleNew() {
 func Example() {
 	cronTab, _ := god.New(
 		context.Background(),
-		god.UnitName("com.github.holyhope.test.god_example"),
-		god.UnitCommand("/bin/bash", "-c", `echo "Hello, world!"`),
+		god.Name("com.github.holyhope.test.god_example"),
+		god.Command("/bin/bash", "-c", `echo "Hello, world!"`),
 		god.ScopeUser,
 	)
 

@@ -17,7 +17,7 @@ type Unit interface {
 	// Envs is the environment variables of the unit.
 	Envs() map[string]string
 	// Scope is the scope of the unit.
-	Scope() UnitScope
+	Scope() Scope
 	// Install the unit to the system.
 	Install(ctx context.Context) error
 	// Uninstall the unit from the system.

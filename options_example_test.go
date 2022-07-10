@@ -6,10 +6,10 @@ import (
 	god "github.com/holyhope/god"
 )
 
-func ExampleUnitName() {
+func ExampleName() {
 	u, _ := god.New(
 		context.Background(),
-		god.UnitName("com.github.holyhope.god_example"),
+		god.Name("com.github.holyhope.god_example"),
 	)
 
 	_ = u.Install(context.Background())

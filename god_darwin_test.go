@@ -50,7 +50,7 @@ var _ = Describe("CrontabDarwin", func() {
 		Context("with no name", func() {
 			It("should fail", func() {
 				Ω(unit.Install(context.Background())).Should(MatchError(&god.MissingOptionsError{
-					Missings: []string{"UnitName", "Scope"},
+					Missings: []string{"UnitName", "Scope", "Command"},
 				}))
 			})
 		})
@@ -58,13 +58,13 @@ var _ = Describe("CrontabDarwin", func() {
 		Context("With name", func() {
 			BeforeEach(func() {
 				fileName := fmt.Sprintf("com.github.holyhope.test.%s", strcase.ToSnake(CurrentSpecReport().FullText()))
-				opts = append(opts, god.UnitName(fileName))
+				opts = append(opts, god.Name(fileName))
 			})
 
 			Context("with no scope", func() {
 				It("should fail", func() {
 					Ω(unit.Install(context.Background())).Should(MatchError(&god.MissingOptionsError{
-						Missings: []string{"Scope"},
+						Missings: []string{"Scope", "Command"},
 					}))
 				})
 			})
@@ -74,7 +74,19 @@ var _ = Describe("CrontabDarwin", func() {
 					opts = append(opts, crontab.ScopeUser)
 				})
 
-				Context("Without entries", func() {
+				Context("with no command", func() {
+					It("should fail", func() {
+						Ω(unit.Install(context.Background())).Should(MatchError(&god.MissingOptionsError{
+							Missings: []string{"Command"},
+						}))
+					})
+				})
+
+				Context("with command", func() {
+					BeforeEach(func() {
+						opts = append(opts, crontab.Command("bash", "-c", `echo 'Hello, world!'`))
+					})
+
 					It("should work", func() {
 						Ω(unit.Install(context.Background())).Should(Succeed())
 					})

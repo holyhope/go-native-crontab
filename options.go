@@ -36,36 +36,36 @@ func (err *MissingOptionsError) IsEmpty() bool {
 	return len(err.Missings) == 0
 }
 
-// UnitName is the name of the unit.
-type UnitName string
+// Name is the name of the unit.
+type Name string
 
-// UnitType is the type of the unit.
-type UnitType string
+// Type is the type of the unit.
+type Type string
 
-// UnitState is the state of the unit.
-type UnitState string
+// State is the state of the unit.
+type State string
 
-// UnitDescription is the description of the unit.
-type UnitDescription string
+// Description is the description of the unit.
+type Description string
 
-// UnitEnvs is the environment variables of the unit.
-type UnitEnvs map[string]string
+// Envs is the environment variables of the unit.
+type Envs map[string]string
 
-// UnitInterval is the interval of the unit.
-type UnitInterval time.Duration
+// Interval is the interval of the unit.
+type Interval time.Duration
 
 // UnitScope is the scope of the unit.
-// go:generate stringer -type=UnitScope -linecomment
-type UnitScope uint8
+//go:generate stringer -type=Scope -linecomment
+type Scope uint8
 
 const (
-	scopeUnspecified UnitScope = iota // unspecified
-	ScopeUser                         // user
-	ScopeSystem                       // system
+	scopeUnspecified Scope = iota // unspecified
+	ScopeUser                     // user
+	ScopeSystem                   // system
 )
 
-type UnkownScopeError UnitScope
+type UnkownScopeError Scope
 
 func (err UnkownScopeError) Error() string {
-	return fmt.Sprintf("unknown scope %s", UnitScope(err).String())
+	return fmt.Sprintf("unknown scope %s", Scope(err).String())
 }

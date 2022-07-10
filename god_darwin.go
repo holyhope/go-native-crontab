@@ -34,7 +34,7 @@ type unit struct {
 	description string
 	command     []string
 	envs        map[string]string
-	scope       UnitScope
+	scope       Scope
 	interval    time.Duration
 }
 
@@ -62,7 +62,7 @@ func (u *unit) Envs() map[string]string {
 	return u.envs
 }
 
-func (u *unit) Scope() UnitScope {
+func (u *unit) Scope() Scope {
 	return u.scope
 }
 
@@ -83,6 +83,10 @@ func (u *unit) Install(ctx context.Context) error {
 
 	if u.scope == scopeUnspecified {
 		missingsError.addMissing("Scope")
+	}
+
+	if len(u.command) == 0 {
+		missingsError.addMissing("Command")
 	}
 
 	if !missingsError.IsEmpty() {
@@ -116,11 +120,19 @@ func (u *unit) Install(ctx context.Context) error {
 
 func (u *unit) ToPlist(writer io.Writer) error {
 	agent := &launchUnit{
-		Label:            u.name,
-		Program:          u.command[0],
-		ProgramArguments: u.command[1:],
-		RunAtLoad:        true,
-		StartInterval:    int(u.interval.Seconds()),
+		Label:         u.name,
+		RunAtLoad:     true,
+		StartInterval: int(u.interval.Seconds()),
+	}
+
+	switch len(u.command) {
+	case 0:
+		return fmt.Errorf("command is empty")
+	case 1:
+		agent.Program = u.command[0]
+	default:
+		agent.Program = u.command[0]
+		agent.ProgramArguments = u.command[1:]
 	}
 
 	encoder := plist.NewEncoder(writer)

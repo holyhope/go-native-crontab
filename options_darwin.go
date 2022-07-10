@@ -10,7 +10,7 @@ import (
 	"path"
 )
 
-func (name UnitName) Apply(ctx context.Context, u Unit) error {
+func (name Name) Apply(ctx context.Context, u Unit) error {
 	if u, ok := u.(*unit); ok {
 		u.name = string(name)
 	}
@@ -18,7 +18,7 @@ func (name UnitName) Apply(ctx context.Context, u Unit) error {
 	return nil
 }
 
-func (ut UnitType) Apply(ctx context.Context, u Unit) error {
+func (ut Type) Apply(ctx context.Context, u Unit) error {
 	if u, ok := u.(*unit); ok {
 		u.unitType = string(ut)
 	}
@@ -26,7 +26,7 @@ func (ut UnitType) Apply(ctx context.Context, u Unit) error {
 	return nil
 }
 
-func (state UnitState) Apply(ctx context.Context, u Unit) error {
+func (state State) Apply(ctx context.Context, u Unit) error {
 	if u, ok := u.(*unit); ok {
 		u.state = string(state)
 	}
@@ -34,7 +34,7 @@ func (state UnitState) Apply(ctx context.Context, u Unit) error {
 	return nil
 }
 
-func (description UnitDescription) Apply(ctx context.Context, u Unit) error {
+func (description Description) Apply(ctx context.Context, u Unit) error {
 	if u, ok := u.(*unit); ok {
 		u.description = string(description)
 	}
@@ -42,8 +42,8 @@ func (description UnitDescription) Apply(ctx context.Context, u Unit) error {
 	return nil
 }
 
-// UnitCommand is the command of the unit.
-func UnitCommand(cmd string, args ...string) FactoryOpts {
+// Command is the command of the unit.
+func Command(cmd string, args ...string) FactoryOpts {
 	return FactoryOptsFn(func(ctx context.Context, u Unit) error {
 		if u, ok := u.(*unit); ok {
 			u.command = append([]string{cmd}, args...)
@@ -54,7 +54,7 @@ func UnitCommand(cmd string, args ...string) FactoryOpts {
 	})
 }
 
-func (envs UnitEnvs) Apply(ctx context.Context, u Unit) error {
+func (envs Envs) Apply(ctx context.Context, u Unit) error {
 	if u, ok := u.(*unit); ok {
 		u.envs = envs
 	}
@@ -62,7 +62,7 @@ func (envs UnitEnvs) Apply(ctx context.Context, u Unit) error {
 	return nil
 }
 
-func (scope UnitScope) Path(filename string) (string, error) {
+func (scope Scope) Path(filename string) (string, error) {
 	switch scope {
 	case ScopeUser:
 		home, err := os.UserHomeDir()
@@ -78,7 +78,7 @@ func (scope UnitScope) Path(filename string) (string, error) {
 	}
 }
 
-func (scope UnitScope) Apply(ctx context.Context, u Unit) error {
+func (scope Scope) Apply(ctx context.Context, u Unit) error {
 	if u, ok := u.(*unit); ok {
 		u.scope = scope
 	}
