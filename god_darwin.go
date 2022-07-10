@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"time"
 
 	"howett.net/plist"
 )
@@ -34,6 +35,7 @@ type unit struct {
 	command     []string
 	envs        map[string]string
 	scope       UnitScope
+	interval    time.Duration
 }
 
 func (u *unit) Name() string {
@@ -118,7 +120,7 @@ func (u *unit) ToPlist(writer io.Writer) error {
 		Program:          u.command[0],
 		ProgramArguments: u.command[1:],
 		RunAtLoad:        true,
-		StartInterval:    1,
+		StartInterval:    int(u.interval.Seconds()),
 	}
 
 	encoder := plist.NewEncoder(writer)

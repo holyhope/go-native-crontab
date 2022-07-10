@@ -3,6 +3,7 @@ package god
 import (
 	"context"
 	"fmt"
+	"time"
 )
 
 type FactoryOptsFn func(context.Context, Unit) error
@@ -49,6 +50,9 @@ type UnitDescription string
 
 // UnitEnvs is the environment variables of the unit.
 type UnitEnvs map[string]string
+
+// UnitInterval is the interval of the unit.
+type UnitInterval time.Duration
 
 // UnitScope is the scope of the unit.
 // go:generate stringer -type=UnitScope -linecomment
