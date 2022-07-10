@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"time"
 )
 
 func (name Name) Apply(ctx context.Context, u Unit) error {
@@ -37,6 +38,14 @@ func (state State) Apply(ctx context.Context, u Unit) error {
 func (description Description) Apply(ctx context.Context, u Unit) error {
 	if u, ok := u.(*unit); ok {
 		u.description = string(description)
+	}
+
+	return nil
+}
+
+func (interval Interval) Apply(ctx context.Context, u Unit) error {
+	if u, ok := u.(*unit); ok {
+		u.interval = time.Duration(interval)
 	}
 
 	return nil

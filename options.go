@@ -39,20 +39,32 @@ func (err *MissingOptionsError) IsEmpty() bool {
 // Name is the name of the unit.
 type Name string
 
+var _ FactoryOpts = Name("")
+
 // Type is the type of the unit.
 type Type string
+
+var _ FactoryOpts = Type("")
 
 // State is the state of the unit.
 type State string
 
+var _ FactoryOpts = State("")
+
 // Description is the description of the unit.
 type Description string
+
+var _ FactoryOpts = Description("")
 
 // Envs is the environment variables of the unit.
 type Envs map[string]string
 
+var _ FactoryOpts = Envs(nil)
+
 // Interval is the interval of the unit.
 type Interval time.Duration
+
+var _ FactoryOpts = Interval(0)
 
 // UnitScope is the scope of the unit.
 //go:generate stringer -type=Scope -linecomment
