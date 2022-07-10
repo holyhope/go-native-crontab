@@ -114,9 +114,9 @@ func (u *unit) Install(ctx context.Context) error {
 
 func (u *unit) ToPlist(writer io.Writer) error {
 	agent := &launchUnit{
-		Label:            "crontab",
-		Program:          "/bin/sh",
-		ProgramArguments: []string{"-c", "crontab"},
+		Label:            u.name,
+		Program:          u.command[0],
+		ProgramArguments: u.command[1:],
 		RunAtLoad:        true,
 		StartInterval:    1,
 	}
