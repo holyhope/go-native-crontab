@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -32,13 +33,14 @@ var _ = Describe("Launchd", func() {
 			It("should return an error", func() {
 				_, err := launchd.New(context.Background(), opts)
 				Expect(err).To(Or(
-					MatchError(&god.InvalidOptionError{
-						Key:   god.Name,
-						Value: nil,
+					MatchError(&god.MissingOptionError{
+						Key: "Name",
 					}),
-					MatchError(&god.InvalidOptionError{
-						Key:   god.Scope,
-						Value: nil,
+					MatchError(&god.MissingOptionError{
+						Key: "Program",
+					}),
+					MatchError(&god.MissingOptionError{
+						Key: "Scope",
 					}),
 				))
 			})
@@ -48,17 +50,19 @@ var _ = Describe("Launchd", func() {
 	Describe("Install", func() {
 		var unit god.Unit
 
-		Context("With name", func() {
+		Context("With all options", func() {
 			BeforeEach(func() {
 				name := fmt.Sprintf("com.github.holyhope.god.test.%s", strcase.ToSnake(CurrentSpecReport().FullText()))
 
 				var err error
-				unit, err = launchd.New(context.Background(), god.With(
-					god.Name, name,
-					god.Scope, god.ScopeUser,
-					god.Program, "bash",
-					god.ProgramArguments, []string{"-c", `echo 'Hello, world!'`},
-				))
+				unit, err = launchd.New(context.Background(), god.Opts().
+					WithName(name).
+					WithScope(god.ScopeUser).
+					WithProgram(bashPath).
+					WithArguments("-c", `echo 'Hello, world!'`).
+					WithUserOwner(os.Getuid()).
+					WithDarwinLimitLoadToSessionType(god.DarwinLimitLoadToSessionBackground),
+				)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(unit).ToNot(BeNil())
 			})
@@ -77,18 +81,20 @@ var _ = Describe("Launchd", func() {
 			name := fmt.Sprintf("com.github.holyhope.god.test.%s", strcase.ToSnake(CurrentSpecReport().FullText()))
 
 			var err error
-			unit, err = launchd.New(context.Background(), god.With(
-				god.Name, name,
-				god.Scope, god.ScopeUser,
-				god.Program, "bash",
-				god.ProgramArguments, []string{"-c", `echo 'Hello, world!'`},
-			))
+			unit, err = launchd.New(context.Background(), god.Opts().
+				WithName(name).
+				WithScope(god.ScopeUser).
+				WithProgram(bashPath).
+				WithArguments("-c", `echo 'Hello, world!'`).
+				WithUserOwner(os.Getuid()).
+				WithDarwinLimitLoadToSessionType(god.DarwinLimitLoadToSessionBackground),
+			)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(unit).ToNot(BeNil())
 		})
 
 		Context("without installation", func() {
-			It("should fail", func() {
+			It("should work", func() {
 				Ω(unit.Uninstall(context.Background())).ShouldNot(Succeed())
 			})
 		})
@@ -114,14 +120,13 @@ var _ = Describe("Launchd", func() {
 		BeforeEach(func() {
 			name := fmt.Sprintf("com.github.holyhope.god.test.%s", strcase.ToSnake(CurrentSpecReport().FullText()))
 
-			u, err := launchd.New(
-				context.Background(),
-				god.With(
-					god.Name, name,
-					god.Scope, god.ScopeUser,
-					god.Program, "bash",
-					god.ProgramArguments, []string{"-c", `echo 'Hello, world!'`},
-				),
+			u, err := launchd.New(context.Background(), god.Opts().
+				WithName(name).
+				WithScope(god.ScopeUser).
+				WithProgram("/bin/bash").
+				WithArguments("-c", `echo 'Hello, world!'`).
+				WithUserOwner(0).
+				WithDarwinLimitLoadToSessionType(god.DarwinLimitLoadToSessionBackground),
 			)
 			Ω(err).ShouldNot(HaveOccurred())
 			Ω(u).ShouldNot(BeNil())

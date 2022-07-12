@@ -54,6 +54,14 @@ func (u launchUnit) SoftResourceLimits(value *resourceLimits) {
 	u[C.LAUNCH_JOBKEY_SOFTRESOURCELIMITS] = value
 }
 
+func (u launchUnit) Username(value string) {
+	u[C.LAUNCH_JOBKEY_USERNAME] = value
+}
+
+func (u launchUnit) Groupname(value string) {
+	u[C.LAUNCH_JOBKEY_GROUPNAME] = value
+}
+
 func (u launchUnit) HardResourceLimits(value *resourceLimits) {
 	if value == nil {
 		delete(u, C.LAUNCH_JOBKEY_HARDRESOURCELIMITS)
@@ -82,4 +90,8 @@ func (u launchUnit) EnvironmentVariables(value map[string]string) {
 	}
 
 	u[C.LAUNCH_JOBKEY_ENVIRONMENTVARIABLES] = value
+}
+
+func (u launchUnit) LimitLoadSessionType(value string) {
+	u[C.LAUNCH_JOBKEY_LIMITLOADTOSESSIONTYPE] = value
 }

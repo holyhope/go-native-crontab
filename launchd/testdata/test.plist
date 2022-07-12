@@ -6,16 +6,16 @@
         <false/>
         <key>Label</key>
         <string>com.github.holyhope.god.test.launchd_to_plist_should_return_proper_plist_content</string>
+        <key>LimitLoadToSessionType</key>
+        <string>Background</string>
         <key>Program</key>
-        <string>bash</string>
+        <string>/bin/bash</string>
         <key>ProgramArguments</key>
         <array>
             <string>-c</string>
             <string>echo &#39;Hello, world!&#39;</string>
         </array>
-        <key>RunAtLoad</key>
-        <true/>
-        <key>StartInterval</key>
-        <integer>0</integer>
+        <key>UserName</key>
+        <string>root</string>
     </dict>
 </plist>

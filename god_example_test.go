@@ -9,7 +9,7 @@ import (
 )
 
 func ExampleNew() {
-	god.New(context.Background(), god.With(god.Name, "test"))
+	god.New(context.Background(), god.Opts().WithName("test"))
 
 	fmt.Printf("New god object created")
 
@@ -20,12 +20,11 @@ func ExampleNew() {
 func Example() {
 	unit, err := god.New(
 		context.Background(),
-		god.With(
-			god.Name, "com.github.holyhope.test.god_example",
-			god.Program, "/bin/bash",
-			god.ProgramArguments, []string{"-c", `echo "Hello, world!"`},
-			god.Scope, god.ScopeUser,
-		),
+		god.Opts().
+			WithName("com.github.holyhope.test.god_example").
+			WithProgram("/bin/bash").
+			WithArguments("-c", `echo "Hello, world!"`).
+			WithScope(god.ScopeUser),
 	)
 	if err != nil {
 		panic(err)

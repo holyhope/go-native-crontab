@@ -8,85 +8,86 @@ import (
 )
 
 var _ = Describe("Options", func() {
+	var opts god.Options
+
+	BeforeEach(func() {
+		opts = god.Opts()
+		Expect(opts).ToNot(BeNil())
+	})
+
 	Describe("With no option", func() {
-		var opts god.Options
-
-		BeforeEach(func() {
-			opts = god.With()
-		})
-
-		It("Be valid", func() {
-			Expect(opts).ToNot(BeNil())
-		})
-
-		It("Does not contain other option", func() {
-			Expect(opts.Keys()).To(HaveLen(0))
+		It("Should not have any options", func() {
+			Expect(opts.HasArguments()).To(BeFalse())
+			Expect(opts.HasDescription()).To(BeFalse())
+			Expect(opts.HasEnvironmentVariables()).To(BeFalse())
+			Expect(opts.HasGroupOwner()).To(BeFalse())
+			Expect(opts.HasInterval()).To(BeFalse())
+			Expect(opts.HasName()).To(BeFalse())
+			Expect(opts.HasProgram()).To(BeFalse())
+			Expect(opts.HasRunAtLoad()).To(BeFalse())
+			Expect(opts.HasScope()).To(BeFalse())
+			Expect(opts.HasState()).To(BeFalse())
+			Expect(opts.HasUserOwner()).To(BeFalse())
 		})
 	})
-	Describe("With a single option", func() {
-		var opts god.Options
 
+	Describe("With a single option", func() {
 		BeforeEach(func() {
-			opts = god.With(god.Name, "test")
+			opts = opts.WithName("test")
 		})
 
 		It("Contains the option", func() {
-			Expect(opts.Get(god.Name)).To(Equal("test"))
+			Expect(opts.HasName()).To(BeTrue())
+			Expect(opts.Name()).To(Equal("test"))
 		})
 
 		It("Does not contain other option", func() {
-			Expect(opts.Keys()).To(HaveLen(1))
+			Expect(opts.HasArguments()).To(BeFalse())
+			Expect(opts.HasDescription()).To(BeFalse())
+			Expect(opts.HasEnvironmentVariables()).To(BeFalse())
+			Expect(opts.HasGroupOwner()).To(BeFalse())
+			Expect(opts.HasInterval()).To(BeFalse())
+			// Do not check for opts.HasName()
+			Expect(opts.HasProgram()).To(BeFalse())
+			Expect(opts.HasRunAtLoad()).To(BeFalse())
+			Expect(opts.HasScope()).To(BeFalse())
+			Expect(opts.HasState()).To(BeFalse())
+			Expect(opts.HasUserOwner()).To(BeFalse())
 		})
 	})
 
 	Describe("With multiple option", func() {
-		var opts god.Options
-
 		BeforeEach(func() {
-			opts = god.With(god.Name, "test", god.Program, "/bin/bash", god.Scope, god.ScopeSystem)
+			opts = opts.
+				WithName("test").
+				WithProgram("/bin/bash").
+				WithScope(god.ScopeSystem)
 		})
 
 		It("Contains all the options", func() {
-			Expect(opts.Get(god.Name)).To(Equal("test"))
-			Expect(opts.Get(god.Program)).To(Equal("/bin/bash"))
-			Expect(opts.Get(god.Scope)).To(Equal(god.ScopeSystem))
-			Expect(opts.Keys()).To(HaveLen(3))
+			Expect(opts.Name()).To(Equal("test"))
+			Expect(opts.Program()).To(Equal("/bin/bash"))
+			Expect(opts.Scope()).To(Equal(god.ScopeSystem))
 		})
 	})
 
 	Describe("Adding option", func() {
-		var opts god.Options
-
-		Context("To nil Options", func() {
-			BeforeEach(func() {
-				opts = nil
-			})
-
-			PIt("Should return a new options containing the value", func() {
-				opts := opts.And(god.Name, "test")
-				Expect(opts).ToNot(BeNil())
-				Expect(opts.Get(god.Name)).To(Equal("test"))
-			})
-		})
-
 		Context("To an non empty option", func() {
 			BeforeEach(func() {
-				opts = god.With(god.Name, "test")
+				opts = opts.WithName("test")
 			})
 
 			It("Should merge options", func() {
-				opts := opts.And(god.Scope, god.ScopeSystem)
+				opts := opts.WithScope(god.ScopeSystem)
 				Expect(opts).ToNot(BeNil())
-				Expect(opts.Get(god.Name)).To(Equal("test"))
-				Expect(opts.Get(god.Scope)).To(Equal(god.ScopeSystem))
-				Expect(opts.Keys()).To(HaveLen(2))
+				Expect(opts.Name()).To(Equal("test"))
+				Expect(opts.Scope()).To(Equal(god.ScopeSystem))
 			})
 
 			It("Should override value with same key", func() {
-				opts := opts.And(god.Name, "test2")
+				opts := opts.WithName("test2")
 				Expect(opts).ToNot(BeNil())
-				Expect(opts.Get(god.Name)).To(Equal("test2"))
-				Expect(opts.Keys()).To(HaveLen(1))
+				Expect(opts.Name()).To(Equal("test2"))
 			})
 		})
 	})

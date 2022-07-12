@@ -7,34 +7,12 @@ import (
 	_ "github.com/holyhope/god/launchd"
 )
 
-func ExampleName() {
+func ExampleOptions() {
 	u, _ := god.New(
 		context.Background(),
-		god.With(god.Name, "my-unit"),
-	)
-
-	_ = u.Install(context.Background())
-
-	// Cleanup filesystem
-	_ = u.Uninstall(context.Background())
-}
-
-func ExampleScopeUser() {
-	u, _ := god.New(
-		context.Background(),
-		god.With(god.Scope, god.ScopeUser),
-	)
-
-	_ = u.Install(context.Background())
-
-	// Cleanup filesystem
-	_ = u.Uninstall(context.Background())
-}
-
-func ExampleScopeSystem() {
-	u, _ := god.New(
-		context.Background(),
-		god.With(god.Scope, god.ScopeSystem),
+		god.Opts().
+			WithName("my-unit").
+			WithScope(god.ScopeUser),
 	)
 
 	_ = u.Install(context.Background())

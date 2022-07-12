@@ -1,79 +1,62 @@
 package god
 
+import "time"
+
+type DarwinOptions interface {
+	darwinLimitLoadToSessionTypeOption
+}
 type Options interface {
-	And(...interface{}) Options
-	Has(OptionKey) bool
-	Get(OptionKey) OptionValue
-	Keys() []OptionKey
+	DarwinOptions
+
+	nameOption
+	stateOption
+	descriptionOption
+	programOption
+	argumentsOption
+	runAtLoadOption
+	environmentVariablesOption
+	scopeOption
+	intervalOption
+	userOwnerOption
+	groupOwnerOption
 }
 
-func With(keyValues ...interface{}) Options {
-	return (&options{}).And(keyValues...)
+func Opts() Options {
+	return &options{}
+}
+
+type darwinOptions struct {
+	limitLoadToSessionTypeOption *DarwinLimitLoadToSessionType
 }
 
 type options struct {
-	Values map[OptionKey]OptionValue
+	darwin darwinOptions
+
+	name                 *string
+	state                *State
+	description          *string
+	program              *string
+	arguments            *[]string
+	runAtLoad            *bool
+	environmentVariables *map[string]string
+	scope                *Scope
+	interval             *time.Duration
+	userOwner            *int
+	groupOwner           *int
 }
 
-func (opts *options) And(keyValues ...interface{}) Options {
-	if opts == nil {
-		return With(keyValues)
+func (opts *options) copy() *options {
+	return &options{
+		name:                 opts.name,
+		state:                opts.state,
+		description:          opts.description,
+		program:              opts.program,
+		arguments:            opts.arguments,
+		runAtLoad:            opts.runAtLoad,
+		environmentVariables: opts.environmentVariables,
+		scope:                opts.scope,
+		interval:             opts.interval,
+		userOwner:            opts.userOwner,
+		groupOwner:           opts.groupOwner,
 	}
-
-	values := make(map[OptionKey]OptionValue, len(opts.Values)+1)
-	for k, v := range opts.Values {
-		values[k] = v
-	}
-
-	for i := 0; i < len(keyValues); i += 2 {
-		values[keyValues[i].(OptionKey)] = keyValues[i+1]
-	}
-
-	return &options{Values: values}
 }
-
-func (opts *options) Has(key OptionKey) bool {
-	_, ok := opts.Values[key]
-
-	return ok
-}
-
-func (opts *options) Keys() []OptionKey {
-	keys := make([]OptionKey, 0, len(opts.Values))
-
-	for key := range opts.Values {
-		keys = append(keys, key)
-	}
-
-	return keys
-}
-
-func (opts *options) Get(key OptionKey) OptionValue {
-	return opts.Values[key]
-}
-
-//go:generate stringer -type=OptionKey -linecomment
-type OptionKey uint8
-
-const (
-	Name OptionKey = iota
-	Type
-	State
-	Description
-	Program
-	ProgramArguments
-	Envs
-	Scope
-	Interval
-)
-
-type OptionValue interface{}
-
-//go:generate stringer -type=ScopeValue -linecomment
-// ScopeValue is the scope of the unit.
-type ScopeValue uint8
-
-const (
-	ScopeUser   ScopeValue = iota // user
-	ScopeSystem                   // system
-)

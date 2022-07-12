@@ -6,8 +6,8 @@ import (
 )
 
 type InvalidOptionError struct {
-	Key   OptionKey
-	Value OptionValue
+	Key   string
+	Value interface{}
 }
 
 func (err *InvalidOptionError) Error() string {
@@ -20,4 +20,16 @@ func (err *InvalidOptionError) Is(err2 error) bool {
 	}
 
 	return false
+}
+
+type MissingOptionError InvalidOptionError
+
+func NewMissingOptionError(key string) error {
+	return &MissingOptionError{
+		Key: key,
+	}
+}
+
+func (err *MissingOptionError) Error() string {
+	return fmt.Sprintf("missing option %s", err.Key)
 }
