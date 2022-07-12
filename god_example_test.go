@@ -5,37 +5,39 @@ import (
 	"fmt"
 
 	"github.com/holyhope/god"
+	_ "github.com/holyhope/god/launchd"
 )
 
 func ExampleNew() {
-	ct, err := god.New(context.Background())
-	if err != nil {
-		panic(err)
-	}
+	god.New(context.Background(), god.With(god.Name, "test"))
 
-	_ = ct
-
-	fmt.Println("New god object created")
+	fmt.Printf("New god object created")
 
 	// Output:
 	// New god object created
 }
 
 func Example() {
-	cronTab, _ := god.New(
+	unit, err := god.New(
 		context.Background(),
-		god.Name("com.github.holyhope.test.god_example"),
-		god.Command("/bin/bash", "-c", `echo "Hello, world!"`),
-		god.ScopeUser,
+		god.With(
+			god.Name, "com.github.holyhope.test.god_example",
+			god.Program, "/bin/bash",
+			god.ProgramArguments, []string{"-c", `echo "Hello, world!"`},
+			god.Scope, god.ScopeUser,
+		),
 	)
+	if err != nil {
+		panic(err)
+	}
 
 	// Install the unit to the system
-	_ = cronTab.Install(context.Background())
+	_ = unit.Install(context.Background())
 
 	fmt.Println("Unit installed")
 
 	// Install the unit to the system
-	_ = cronTab.Uninstall(context.Background())
+	_ = unit.Uninstall(context.Background())
 
 	fmt.Println("Unit uninstalled")
 

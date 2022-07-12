@@ -8,7 +8,7 @@ import (
 	"errors"
 )
 
-// New creates a new CronTab.
+// New creates a new Unit.
 func New(_ context.Context, _ ...FactoryOpts) (Unit, error) {
 	return nil, errors.New("not implemented")
 }

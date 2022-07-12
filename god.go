@@ -1,4 +1,5 @@
 package god
 
-// Ensure that the package supports current build.
-var _ = New
+import "context"
+
+var New func(context.Context, Options) (Unit, error)

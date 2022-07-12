@@ -7,9 +7,10 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestGoNativeCrontab(t *testing.T) {
+func TestGod(t *testing.T) {
 	t.Parallel()
 
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "GoNativeCrontab Suite")
+	suiteConfig, reporterConfig := GinkgoConfiguration()
+	RunSpecs(t, "God test suite", suiteConfig, reporterConfig)
 }

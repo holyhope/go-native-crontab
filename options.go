@@ -1,83 +1,79 @@
 package god
 
-import (
-	"context"
-	"fmt"
-	"time"
-)
+type Options interface {
+	And(...interface{}) Options
+	Has(OptionKey) bool
+	Get(OptionKey) OptionValue
+	Keys() []OptionKey
+}
 
-type FactoryOptsFn func(context.Context, Unit) error
+func With(keyValues ...interface{}) Options {
+	return (&options{}).And(keyValues...)
+}
 
-func (f FactoryOptsFn) Apply(ctx context.Context, u Unit) error {
-	if f == nil {
-		return nil
+type options struct {
+	Values map[OptionKey]OptionValue
+}
+
+func (opts *options) And(keyValues ...interface{}) Options {
+	if opts == nil {
+		return With(keyValues)
 	}
 
-	return f(ctx, u)
+	values := make(map[OptionKey]OptionValue, len(opts.Values)+1)
+	for k, v := range opts.Values {
+		values[k] = v
+	}
+
+	for i := 0; i < len(keyValues); i += 2 {
+		values[keyValues[i].(OptionKey)] = keyValues[i+1]
+	}
+
+	return &options{Values: values}
 }
 
-func NoOp(ctx context.Context, ct Unit) (Unit, error) {
-	return ct, nil
+func (opts *options) Has(key OptionKey) bool {
+	_, ok := opts.Values[key]
+
+	return ok
 }
 
-type MissingOptionsError struct {
-	Missings []string
+func (opts *options) Keys() []OptionKey {
+	keys := make([]OptionKey, 0, len(opts.Values))
+
+	for key := range opts.Values {
+		keys = append(keys, key)
+	}
+
+	return keys
 }
 
-func (err *MissingOptionsError) Error() string {
-	return fmt.Sprintf("missing option %v", err.Missings)
+func (opts *options) Get(key OptionKey) OptionValue {
+	return opts.Values[key]
 }
 
-func (err *MissingOptionsError) addMissing(name string) {
-	err.Missings = append(err.Missings, name)
-}
-
-func (err *MissingOptionsError) IsEmpty() bool {
-	return len(err.Missings) == 0
-}
-
-// Name is the name of the unit.
-type Name string
-
-var _ FactoryOpts = Name("")
-
-// Type is the type of the unit.
-type Type string
-
-var _ FactoryOpts = Type("")
-
-// State is the state of the unit.
-type State string
-
-var _ FactoryOpts = State("")
-
-// Description is the description of the unit.
-type Description string
-
-var _ FactoryOpts = Description("")
-
-// Envs is the environment variables of the unit.
-type Envs map[string]string
-
-var _ FactoryOpts = Envs(nil)
-
-// Interval is the interval of the unit.
-type Interval time.Duration
-
-var _ FactoryOpts = Interval(0)
-
-// UnitScope is the scope of the unit.
-//go:generate stringer -type=Scope -linecomment
-type Scope uint8
+//go:generate stringer -type=OptionKey -linecomment
+type OptionKey uint8
 
 const (
-	scopeUnspecified Scope = iota // unspecified
-	ScopeUser                     // user
-	ScopeSystem                   // system
+	Name OptionKey = iota
+	Type
+	State
+	Description
+	Program
+	ProgramArguments
+	Envs
+	Scope
+	Interval
 )
 
-type UnkownScopeError Scope
+type OptionValue interface{}
 
-func (err UnkownScopeError) Error() string {
-	return fmt.Sprintf("unknown scope %s", Scope(err).String())
-}
+//go:generate stringer -type=ScopeValue -linecomment
+// ScopeValue is the scope of the unit.
+type ScopeValue uint8
+
+const (
+	ScopeUser   ScopeValue = iota // user
+	ScopeSystem                   // system
+)

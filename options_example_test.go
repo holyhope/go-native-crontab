@@ -3,13 +3,14 @@ package god_test
 import (
 	"context"
 
-	god "github.com/holyhope/god"
+	"github.com/holyhope/god"
+	_ "github.com/holyhope/god/launchd"
 )
 
 func ExampleName() {
 	u, _ := god.New(
 		context.Background(),
-		god.Name("com.github.holyhope.god_example"),
+		god.With(god.Name, "my-unit"),
 	)
 
 	_ = u.Install(context.Background())
@@ -21,7 +22,7 @@ func ExampleName() {
 func ExampleScopeUser() {
 	u, _ := god.New(
 		context.Background(),
-		god.ScopeUser,
+		god.With(god.Scope, god.ScopeUser),
 	)
 
 	_ = u.Install(context.Background())
@@ -33,7 +34,7 @@ func ExampleScopeUser() {
 func ExampleScopeSystem() {
 	u, _ := god.New(
 		context.Background(),
-		god.ScopeSystem,
+		god.With(god.Scope, god.ScopeSystem),
 	)
 
 	_ = u.Install(context.Background())
