@@ -4,18 +4,16 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
-	"os/user"
+
+	_ "embed"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
 
-	_ "embed"
-
 	"github.com/holyhope/god"
+	"github.com/holyhope/god/internal/tests"
 	"github.com/holyhope/god/launchd"
-
 	"github.com/iancoleman/strcase"
 )
 
@@ -23,115 +21,7 @@ import (
 var plistContent []byte
 
 var _ = Describe("Launchd", func() {
-	Describe("New unit", func() {
-		var opts god.Options
-
-		BeforeEach(func() {
-			opts = nil
-		})
-
-		Context("With no options", func() {
-			It("should return an error", func() {
-				_, err := launchd.New(context.Background(), opts)
-				Expect(err).To(Or(
-					MatchError(&god.MissingOptionError{
-						Key: "Name",
-					}),
-					MatchError(&god.MissingOptionError{
-						Key: "Program",
-					}),
-					MatchError(&god.MissingOptionError{
-						Key: "Scope",
-					}),
-				))
-			})
-		})
-	})
-
-	Describe("Install", func() {
-		var unit god.Unit
-
-		AfterEach(func() {
-			Ω(unit.Uninstall(context.Background())).Should(Succeed())
-		})
-
-		Context("With all options", func() {
-			BeforeEach(func() {
-				name := fmt.Sprintf("com.github.holyhope.god.test.%s", strcase.ToSnake(CurrentSpecReport().FullText()))
-
-				var err error
-				unit, err = launchd.New(context.Background(), god.Opts().
-					WithName(name).
-					WithScope(god.ScopeUser).
-					WithProgram(bashPath).
-					WithArguments("-c", `echo 'Hello, world!'`).
-					WithUserOwner(os.Getuid()).
-					WithDarwinLimitLoadToSessionType(god.DarwinLimitLoadToSessionBackground),
-				)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(unit).ToNot(BeNil())
-			})
-
-			It("Should work", func() {
-				Ω(unit.Install(context.Background())).Should(Succeed())
-			})
-
-			It("Can be installed multiple times", func() {
-				currentUser, err := user.Current()
-				Expect(err).ToNot(HaveOccurred())
-
-				if currentUser.Uid != "0" {
-					Skip("This test requires root privileges")
-				}
-
-				Ω(unit.Install(context.Background())).Should(Succeed())
-				Ω(unit.Install(context.Background())).Should(Succeed())
-			})
-		})
-	})
-
-	Describe("Uninstall", func() {
-		var unit god.Unit
-
-		BeforeEach(func() {
-			name := fmt.Sprintf("com.github.holyhope.god.test.%s", strcase.ToSnake(CurrentSpecReport().FullText()))
-
-			var err error
-			unit, err = launchd.New(context.Background(), god.Opts().
-				WithName(name).
-				WithScope(god.ScopeUser).
-				WithProgram(bashPath).
-				WithArguments("-c", `echo 'Hello, world!'`).
-				WithUserOwner(os.Getuid()).
-				WithDarwinLimitLoadToSessionType(god.DarwinLimitLoadToSessionBackground),
-			)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(unit).ToNot(BeNil())
-		})
-
-		Context("without installation", func() {
-			It("should work", func() {
-				currentUser, err := user.Current()
-				Expect(err).ToNot(HaveOccurred())
-
-				if currentUser.Uid != "0" {
-					Skip("This test requires root privileges")
-				}
-
-				Ω(unit.Uninstall(context.Background())).Should(Succeed())
-			})
-		})
-
-		Context("After installation", func() {
-			BeforeEach(func() {
-				Ω(unit.Install(context.Background())).Should(Succeed())
-			})
-
-			It("should work", func() {
-				Ω(unit.Uninstall(context.Background())).Should(Succeed())
-			})
-		})
-	})
+	tests.NewSuite(launchd.New)
 
 	Describe("ToPlist", func() {
 		type PList interface {
