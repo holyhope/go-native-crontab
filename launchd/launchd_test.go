@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/user"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -50,6 +51,10 @@ var _ = Describe("Launchd", func() {
 	Describe("Install", func() {
 		var unit god.Unit
 
+		AfterEach(func() {
+			Ω(unit.Uninstall(context.Background())).Should(Succeed())
+		})
+
 		Context("With all options", func() {
 			BeforeEach(func() {
 				name := fmt.Sprintf("com.github.holyhope.god.test.%s", strcase.ToSnake(CurrentSpecReport().FullText()))
@@ -67,9 +72,20 @@ var _ = Describe("Launchd", func() {
 				Expect(unit).ToNot(BeNil())
 			})
 
-			It("should work", func() {
+			It("Should work", func() {
 				Ω(unit.Install(context.Background())).Should(Succeed())
-				Ω(unit.Uninstall(context.Background())).Should(Succeed())
+			})
+
+			It("Can be installed multiple times", func() {
+				currentUser, err := user.Current()
+				Expect(err).ToNot(HaveOccurred())
+
+				if currentUser.Uid != "0" {
+					Skip("This test requires root privileges")
+				}
+
+				Ω(unit.Install(context.Background())).Should(Succeed())
+				Ω(unit.Install(context.Background())).Should(Succeed())
 			})
 		})
 	})
@@ -95,7 +111,14 @@ var _ = Describe("Launchd", func() {
 
 		Context("without installation", func() {
 			It("should work", func() {
-				Ω(unit.Uninstall(context.Background())).ShouldNot(Succeed())
+				currentUser, err := user.Current()
+				Expect(err).ToNot(HaveOccurred())
+
+				if currentUser.Uid != "0" {
+					Skip("This test requires root privileges")
+				}
+
+				Ω(unit.Uninstall(context.Background())).Should(Succeed())
 			})
 		})
 

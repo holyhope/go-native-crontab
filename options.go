@@ -19,6 +19,7 @@ type Options interface {
 	intervalOption
 	userOwnerOption
 	groupOwnerOption
+	workingDirectoryOption
 }
 
 func Opts() Options {
@@ -43,10 +44,12 @@ type options struct {
 	interval             *time.Duration
 	userOwner            *int
 	groupOwner           *int
+	workingDirectory     *string
 }
 
 func (opts *options) copy() *options {
 	return &options{
+		darwin:               *opts.darwin.copy(),
 		name:                 opts.name,
 		state:                opts.state,
 		description:          opts.description,
@@ -58,5 +61,12 @@ func (opts *options) copy() *options {
 		interval:             opts.interval,
 		userOwner:            opts.userOwner,
 		groupOwner:           opts.groupOwner,
+		workingDirectory:     opts.workingDirectory,
+	}
+}
+
+func (opts *darwinOptions) copy() *darwinOptions {
+	return &darwinOptions{
+		limitLoadToSessionTypeOption: opts.limitLoadToSessionTypeOption,
 	}
 }

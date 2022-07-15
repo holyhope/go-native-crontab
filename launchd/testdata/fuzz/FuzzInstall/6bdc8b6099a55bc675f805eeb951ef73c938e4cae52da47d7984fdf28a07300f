@@ -1,6 +1,0 @@
-go test fuzz v1
-string("0")
-string("0")
-byte('\x00')
-byte('\x05')
-int64(999999955)

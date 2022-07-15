@@ -60,6 +60,9 @@ func New(ctx context.Context, opts god.Options) (god.Unit, error) {
 	if opts.HasRunAtLoad() {
 		launchU.RunAtLoad(opts.RunAtLoad())
 	}
+	if opts.HasWorkingDirectory() {
+		launchU.WorkingDirectory(opts.WorkingDirectory())
+	}
 	if opts.HasInterval() {
 		launchU.StartInterval(int(opts.Interval().Seconds()))
 	}
@@ -108,7 +111,17 @@ func (u *Unit) Install(ctx context.Context) error {
 		return fmt.Errorf("write unit file: %w", err)
 	}
 
-	return u.exec(ctx, u.launchctlPath, "bootstrap", u.domain, u.unitPath)
+	if err := u.exec(ctx, u.launchctlPath, "bootstrap", u.domain, u.unitPath); err != nil {
+		if err, ok := err.(*ExecError); ok {
+			if err.MatchLaunchdReason("service already bootstrapped") {
+				return nil
+			}
+		}
+
+		return err
+	}
+
+	return nil
 }
 
 func (u *Unit) exec(ctx context.Context, command string, args ...string) error {
@@ -163,6 +176,12 @@ func (u *Unit) exec(ctx context.Context, command string, args ...string) error {
 func (u *Unit) Uninstall(ctx context.Context) error {
 	err := u.exec(ctx, u.launchctlPath, "bootout", u.domain, u.unitPath)
 	if err != nil {
+		if err, ok := err.(*ExecError); ok {
+			if err.MatchLaunchdReason("No such file or directory") {
+				return nil
+			}
+		}
+
 		return err
 	}
 
