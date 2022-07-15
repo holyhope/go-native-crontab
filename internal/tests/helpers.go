@@ -96,6 +96,54 @@ func NewSuite(factory func(ctx context.Context, opts god.Options) (god.Unit, err
 		})
 	})
 
+	Describe("Status", Offset(1), func() {
+		var unit god.Unit
+
+		BeforeEach(func() {
+			name := fmt.Sprintf("com.github.holyhope.god.test.%s", strcase.ToSnake(CurrentSpecReport().FullText()))
+
+			var err error
+			unit, err = factory(context.Background(), god.Opts().
+				WithName(name).
+				WithScope(god.ScopeUser).
+				WithProgram(BashPath()).
+				WithArguments("-c", `echo 'Hello, world!'`).
+				WithUserOwner(os.Getuid()).
+				WithDarwinLimitLoadToSessionType(god.DarwinLimitLoadToSessionBackground),
+			)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(unit).ToNot(BeNil())
+		})
+
+		Context("Of a non installed unit", func() {
+			It("Should work", func() {
+				status, err := unit.Status(context.Background())
+				Expect(err).ToNot(HaveOccurred())
+
+				Ω(status.Exists(context.Background())).Should(BeFalse())
+				Ω(status.IsLoaded(context.Background())).Should(BeFalse())
+			})
+		})
+
+		Context("Of an installed unit", func() {
+			BeforeEach(func() {
+				Ω(unit.Install(context.Background())).Should(Succeed())
+			})
+
+			AfterEach(func() {
+				Ω(unit.Uninstall(context.Background())).Should(Succeed())
+			})
+
+			It("Should work", func() {
+				status, err := unit.Status(context.Background())
+				Expect(err).ToNot(HaveOccurred())
+
+				Ω(status.Exists(context.Background())).Should(BeTrue())
+				Ω(status.IsLoaded(context.Background())).Should(BeTrue())
+			})
+		})
+	})
+
 	Describe("Uninstall", Offset(1), func() {
 		var unit god.Unit
 

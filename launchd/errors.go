@@ -3,6 +3,7 @@ package launchd
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -10,7 +11,6 @@ type ExecError struct {
 	UnderlyingError error
 	Command         []string
 	Stderr          string
-	Stdout          string
 }
 
 func (err *ExecError) Error() string {
@@ -35,4 +35,14 @@ func (err *ExecError) IsBetterWithSudo() bool {
 
 func (err *ExecError) MatchLaunchdReason(reason string) bool {
 	return strings.HasSuffix(strings.SplitN(err.Stderr, "\n", 2)[0], fmt.Sprintf(": %s", reason))
+}
+
+func (err *ExecError) MatchBadRequestRegex(reason *regexp.Regexp) bool {
+	lines := strings.SplitN(err.Stderr, "\n", 2)
+
+	if lines[0] != "Bad request." {
+		return false
+	}
+
+	return reason.MatchString(lines[1])
 }

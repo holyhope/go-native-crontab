@@ -99,6 +99,7 @@ func New(ctx context.Context, opts god.Options) (god.Unit, error) {
 
 	return &Unit{
 		unitSpec:      launchU,
+		unitName:      name,
 		domain:        domain,
 		unitPath:      unitP,
 		launchctlPath: launchctlPath,
@@ -107,30 +108,13 @@ func New(ctx context.Context, opts god.Options) (god.Unit, error) {
 
 type Unit struct {
 	unitSpec      launchUnit
+	unitName      string
 	domain        string
 	unitPath      string
 	launchctlPath string
 }
 
-func (u *Unit) Install(ctx context.Context) error {
-	if err := u.writeUnitFile(u.unitPath); err != nil {
-		return fmt.Errorf("write unit file: %w", err)
-	}
-
-	if err := u.exec(ctx, u.launchctlPath, "bootstrap", u.domain, u.unitPath); err != nil {
-		if err, ok := err.(*ExecError); ok {
-			if err.MatchLaunchdReason("service already bootstrapped") {
-				return nil
-			}
-		}
-
-		return err
-	}
-
-	return nil
-}
-
-func (u *Unit) exec(ctx context.Context, command string, args ...string) error {
+func (u *Unit) exec(ctx context.Context, command string, args ...string) ([]byte, error) {
 	var stderrReader, stdoutReader io.Reader
 
 	cmd := exec.CommandContext(ctx, command, args...)
@@ -154,7 +138,7 @@ func (u *Unit) exec(ctx context.Context, command string, args ...string) error {
 	}
 
 	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("start launchctl: %w", err)
+		return nil, fmt.Errorf("start launchctl: %w", err)
 	}
 
 	stderr, err := io.ReadAll(stderrReader)
@@ -168,34 +152,14 @@ func (u *Unit) exec(ctx context.Context, command string, args ...string) error {
 	}
 
 	if err := cmd.Wait(); err != nil {
-		return &ExecError{
+		return nil, &ExecError{
 			UnderlyingError: err,
 			Command:         cmd.Args,
 			Stderr:          string(stderr),
-			Stdout:          string(stdout),
 		}
 	}
 
-	return nil
-}
-
-func (u *Unit) Uninstall(ctx context.Context) error {
-	err := u.exec(ctx, u.launchctlPath, "bootout", u.domain, u.unitPath)
-	if err != nil {
-		if err, ok := err.(*ExecError); ok {
-			if err.MatchLaunchdReason("No such file or directory") {
-				return nil
-			}
-		}
-
-		return err
-	}
-
-	if err := os.Remove(u.unitPath); err != nil {
-		return fmt.Errorf("remove unit file: %w", err)
-	}
-
-	return nil
+	return stdout, nil
 }
 
 func (u *Unit) writeUnitFile(unitPath string) error {
