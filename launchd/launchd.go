@@ -63,6 +63,12 @@ func New(ctx context.Context, opts god.Options) (god.Unit, error) {
 	if opts.HasWorkingDirectory() {
 		launchU.WorkingDirectory(opts.WorkingDirectory())
 	}
+	if opts.HasStandardOutput() {
+		launchU.StandardOutPath(opts.StandardOutput())
+	}
+	if opts.HasErrorOutput() {
+		launchU.StandardErrorPath(opts.ErrorOutput())
+	}
 	if opts.HasInterval() {
 		launchU.StartInterval(int(opts.Interval().Seconds()))
 	}

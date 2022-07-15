@@ -20,6 +20,8 @@ type Options interface {
 	userOwnerOption
 	groupOwnerOption
 	workingDirectoryOption
+	standardOutputOption
+	errorOutputOption
 }
 
 func Opts() Options {
@@ -45,6 +47,8 @@ type options struct {
 	userOwner            *int
 	groupOwner           *int
 	workingDirectory     *string
+	standardOutput       *string
+	errorOutput          *string
 }
 
 func (opts *options) copy() *options {
@@ -62,6 +66,8 @@ func (opts *options) copy() *options {
 		userOwner:            opts.userOwner,
 		groupOwner:           opts.groupOwner,
 		workingDirectory:     opts.workingDirectory,
+		standardOutput:       opts.standardOutput,
+		errorOutput:          opts.errorOutput,
 	}
 }
 
