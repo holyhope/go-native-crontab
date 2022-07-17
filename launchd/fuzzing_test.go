@@ -69,12 +69,11 @@ func FuzzInstall(f *testing.F) {
 		Ω(unit).ShouldNot(BeNil())
 
 		t.Logf("Installing %s", name)
+		installationError := unit.Create(context.Background())
 
-		var installationError error
-
-		defer func() {
-			t.Logf("Uninstalling %s", name)
-			err := unit.Uninstall(context.Background())
+		defer func(installationError error) {
+			t.Logf("Deleting %s", name)
+			err := unit.Delete(context.Background())
 
 			// Accept ENOENT and ExitError due to parallelism: the file can be deleted by another test
 
@@ -83,9 +82,7 @@ func FuzzInstall(f *testing.F) {
 			} else if !t.Failed() && !t.Skipped() {
 				Ω(err).Should(Or(Succeed(), MatchError(syscall.ENOENT), MatchError(errors.New("Boot-out failed: 5: Input/output error\nTry re-running the command as root for richer errors.\n"))), "Uninstallation should succeed")
 			}
-		}()
-
-		installationError = unit.Install(context.Background())
+		}(installationError)
 
 		Ω(installationError).Should(Or(Succeed(), MatchError(fs.ErrPermission), MatchError(syscall.EINVAL), MatchError(syscall.EILSEQ), MatchError(syscall.ENAMETOOLONG), MatchError(errors.New("Bootstrap failed: 5: Input/output error\nTry re-running the command as root for richer errors.\n"))), "Installation should succeed or fail with the right error")
 	})

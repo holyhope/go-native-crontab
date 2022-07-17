@@ -3,14 +3,14 @@ package god
 import "context"
 
 type unitStatus struct {
-	exists bool
-	loaded bool
+	exists  bool
+	enabled bool
 }
 
-func NewUnitStatus(exists bool, loaded bool) UnitStatus {
+func NewUnitStatus(exists bool, enabled bool) UnitStatus {
 	return &unitStatus{
-		exists: exists,
-		loaded: loaded,
+		exists:  exists,
+		enabled: enabled,
 	}
 }
 
@@ -18,6 +18,6 @@ func (status *unitStatus) Exists(ctx context.Context) bool {
 	return status.exists
 }
 
-func (status *unitStatus) IsLoaded(ctx context.Context) bool {
-	return status.loaded
+func (status *unitStatus) IsEnabled(ctx context.Context) bool {
+	return status.enabled
 }

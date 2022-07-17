@@ -54,11 +54,11 @@ func NewSuite(factory func(ctx context.Context, opts god.Options) (god.Unit, err
 		})
 	})
 
-	Describe("Install", Offset(1), func() {
+	Describe("Create", Offset(1), func() {
 		var unit god.Unit
 
 		AfterEach(func() {
-			Ω(unit.Uninstall(context.Background())).Should(Succeed())
+			Ω(unit.Delete(context.Background())).Should(Succeed())
 		})
 
 		Context("With all options", func() {
@@ -79,10 +79,10 @@ func NewSuite(factory func(ctx context.Context, opts god.Options) (god.Unit, err
 			})
 
 			It("Should work", func() {
-				Ω(unit.Install(context.Background())).Should(Succeed())
+				Ω(unit.Create(context.Background())).Should(Succeed())
 			})
 
-			It("Can be installed multiple times", func() {
+			It("Can be created multiple times", func() {
 				currentUser, err := user.Current()
 				Expect(err).ToNot(HaveOccurred())
 
@@ -90,8 +90,175 @@ func NewSuite(factory func(ctx context.Context, opts god.Options) (god.Unit, err
 					Skip("This test requires root privileges")
 				}
 
-				Ω(unit.Install(context.Background())).Should(Succeed())
-				Ω(unit.Install(context.Background())).Should(Succeed())
+				Ω(unit.Create(context.Background())).Should(Succeed())
+				Ω(unit.Create(context.Background())).Should(Succeed())
+			})
+
+			Context("A previously deleted unit", func() {
+				BeforeEach(func() {
+					Ω(unit.Create(context.Background())).Should(Succeed())
+					Ω(unit.Delete(context.Background())).Should(Succeed())
+				})
+
+				It("Should be created", func() {
+					Ω(unit.Create(context.Background())).Should(Succeed())
+				})
+			})
+		})
+	})
+
+	Describe("Enable", Offset(1), func() {
+		var unit god.Unit
+
+		BeforeEach(func() {
+			name := fmt.Sprintf("com.github.holyhope.god.test.%s", strcase.ToSnake(CurrentSpecReport().FullText()))
+
+			var err error
+			unit, err = factory(context.Background(), god.Opts().
+				WithName(name).
+				WithScope(god.ScopeUser).
+				WithProgram(BashPath()).
+				WithArguments("-c", `echo 'Hello, world!'`).
+				WithUserOwner(os.Getuid()).
+				WithDarwinLimitLoadToSessionType(god.DarwinLimitLoadToSessionBackground),
+			)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(unit).ToNot(BeNil())
+		})
+
+		Context("A non existing unit", func() {
+			PIt("Should return an error", func() {
+				Ω(unit.Enable(context.Background())).ShouldNot(Succeed())
+			})
+		})
+
+		Context("A previously created unit", func() {
+			BeforeEach(func() {
+				Ω(unit.Create(context.Background())).Should(Succeed())
+			})
+
+			AfterEach(func() {
+				Ω(unit.Delete(context.Background())).Should(Succeed())
+			})
+
+			It("Should work", func() {
+				Ω(unit.Enable(context.Background())).Should(Succeed())
+			})
+
+			It("Can be enabled multiple times", func() {
+				currentUser, err := user.Current()
+				Expect(err).ToNot(HaveOccurred())
+
+				if currentUser.Uid != "0" {
+					Skip("This test requires root privileges")
+				}
+
+				Ω(unit.Enable(context.Background())).Should(Succeed())
+				Ω(unit.Enable(context.Background())).Should(Succeed())
+			})
+		})
+
+		Context("A previously deleted unit", func() {
+			BeforeEach(func() {
+				Ω(unit.Create(context.Background())).Should(Succeed())
+				Ω(unit.Delete(context.Background())).Should(Succeed())
+			})
+
+			It("Should return an error", func() {
+				Ω(unit.Enable(context.Background())).Should(Succeed())
+			})
+		})
+	})
+
+	Describe("Disable", Offset(1), func() {
+		var unit god.Unit
+
+		BeforeEach(func() {
+			name := fmt.Sprintf("com.github.holyhope.god.test.%s", strcase.ToSnake(CurrentSpecReport().FullText()))
+
+			var err error
+			unit, err = factory(context.Background(), god.Opts().
+				WithName(name).
+				WithScope(god.ScopeUser).
+				WithProgram(BashPath()).
+				WithArguments("-c", `echo 'Hello, world!'`).
+				WithUserOwner(os.Getuid()).
+				WithDarwinLimitLoadToSessionType(god.DarwinLimitLoadToSessionBackground),
+			)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(unit).ToNot(BeNil())
+		})
+
+		Context("A non existing unit", func() {
+			PIt("Should return an error", func() {
+				Ω(unit.Disable(context.Background())).ShouldNot(Succeed())
+			})
+		})
+
+		Context("A previously created unit", func() {
+			BeforeEach(func() {
+				Ω(unit.Enable(context.Background())).Should(Succeed())
+				Ω(unit.Create(context.Background())).Should(Succeed())
+			})
+
+			AfterEach(func() {
+				Ω(unit.Delete(context.Background())).Should(Succeed())
+			})
+
+			It("Should work", func() {
+				Ω(unit.Disable(context.Background())).Should(Succeed())
+			})
+
+			It("Can be enabled multiple times", func() {
+				currentUser, err := user.Current()
+				Expect(err).ToNot(HaveOccurred())
+
+				if currentUser.Uid != "0" {
+					Skip("This test requires root privileges")
+				}
+
+				Ω(unit.Disable(context.Background())).Should(Succeed())
+				Ω(unit.Disable(context.Background())).Should(Succeed())
+			})
+		})
+
+		Context("A previously enabled unit", func() {
+			BeforeEach(func() {
+				Ω(unit.Enable(context.Background())).Should(Succeed())
+				Ω(unit.Create(context.Background())).Should(Succeed())
+				Ω(unit.Enable(context.Background())).Should(Succeed())
+			})
+
+			AfterEach(func() {
+				Ω(unit.Delete(context.Background())).Should(Succeed())
+			})
+
+			It("Should work", func() {
+				Ω(unit.Disable(context.Background())).Should(Succeed())
+			})
+
+			It("Can be enabled multiple times", func() {
+				currentUser, err := user.Current()
+				Expect(err).ToNot(HaveOccurred())
+
+				if currentUser.Uid != "0" {
+					Skip("This test requires root privileges")
+				}
+
+				Ω(unit.Disable(context.Background())).Should(Succeed())
+				Ω(unit.Disable(context.Background())).Should(Succeed())
+			})
+		})
+
+		Context("A previously deleted unit", func() {
+			BeforeEach(func() {
+				Ω(unit.Enable(context.Background())).Should(Succeed())
+				Ω(unit.Create(context.Background())).Should(Succeed())
+				Ω(unit.Delete(context.Background())).Should(Succeed())
+			})
+
+			It("Should return an error", func() {
+				Ω(unit.Disable(context.Background())).Should(Succeed())
 			})
 		})
 	})
@@ -115,36 +282,74 @@ func NewSuite(factory func(ctx context.Context, opts god.Options) (god.Unit, err
 			Expect(unit).ToNot(BeNil())
 		})
 
-		Context("Of a non installed unit", func() {
+		Context("Of a non existing unit", func() {
 			It("Should work", func() {
 				status, err := unit.Status(context.Background())
 				Expect(err).ToNot(HaveOccurred())
 
 				Ω(status.Exists(context.Background())).Should(BeFalse())
-				Ω(status.IsLoaded(context.Background())).Should(BeFalse())
+				Ω(status.IsEnabled(context.Background())).Should(BeFalse())
 			})
 		})
 
-		Context("Of an installed unit", func() {
+		Context("Of a previously created unit", func() {
 			BeforeEach(func() {
-				Ω(unit.Install(context.Background())).Should(Succeed())
+				Ω(unit.Create(context.Background())).Should(Succeed())
 			})
 
 			AfterEach(func() {
-				Ω(unit.Uninstall(context.Background())).Should(Succeed())
+				Ω(unit.Delete(context.Background())).Should(Succeed())
 			})
 
-			It("Should work", func() {
+			PIt("Should work", func() {
 				status, err := unit.Status(context.Background())
 				Expect(err).ToNot(HaveOccurred())
 
 				Ω(status.Exists(context.Background())).Should(BeTrue())
-				Ω(status.IsLoaded(context.Background())).Should(BeTrue())
+				Ω(status.IsEnabled(context.Background())).Should(BeFalse())
+			})
+		})
+
+		Context("Of an enabled unit", func() {
+			BeforeEach(func() {
+				Ω(unit.Create(context.Background())).Should(Succeed())
+			})
+
+			AfterEach(func() {
+				Ω(unit.Delete(context.Background())).Should(Succeed())
+			})
+
+			PIt("Should work", func() {
+				status, err := unit.Status(context.Background())
+				Expect(err).ToNot(HaveOccurred())
+
+				Ω(status.Exists(context.Background())).Should(BeTrue())
+				Ω(status.IsEnabled(context.Background())).Should(BeFalse())
+			})
+		})
+
+		Context("Of a disabled unit", func() {
+			BeforeEach(func() {
+				Ω(unit.Create(context.Background())).Should(Succeed())
+				Ω(unit.Enable(context.Background())).Should(Succeed())
+				Ω(unit.Disable(context.Background())).Should(Succeed())
+			})
+
+			AfterEach(func() {
+				Ω(unit.Delete(context.Background())).Should(Succeed())
+			})
+
+			PIt("Should work", func() {
+				status, err := unit.Status(context.Background())
+				Expect(err).ToNot(HaveOccurred())
+
+				Ω(status.Exists(context.Background())).Should(BeTrue())
+				Ω(status.IsEnabled(context.Background())).Should(BeFalse())
 			})
 		})
 	})
 
-	Describe("Uninstall", Offset(1), func() {
+	Describe("Delete", Offset(1), func() {
 		var unit god.Unit
 
 		BeforeEach(func() {
@@ -172,17 +377,17 @@ func NewSuite(factory func(ctx context.Context, opts god.Options) (god.Unit, err
 					Skip("This test requires root privileges")
 				}
 
-				Ω(unit.Uninstall(context.Background())).Should(Succeed())
+				Ω(unit.Delete(context.Background())).Should(Succeed())
 			})
 		})
 
 		Context("After installation", func() {
 			BeforeEach(func() {
-				Ω(unit.Install(context.Background())).Should(Succeed())
+				Ω(unit.Create(context.Background())).Should(Succeed())
 			})
 
 			It("should work", func() {
-				Ω(unit.Uninstall(context.Background())).Should(Succeed())
+				Ω(unit.Delete(context.Background())).Should(Succeed())
 			})
 		})
 	})

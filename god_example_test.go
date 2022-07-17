@@ -31,16 +31,22 @@ func Example() {
 	}
 
 	// Install the unit to the system
-	_ = unit.Install(context.Background())
+	_ = unit.Create(context.Background())
 
 	fmt.Println("Unit installed")
 
+	// Enable the unit
+	_ = unit.Enable(context.Background())
+
+	fmt.Println("Unit enabled")
+
 	// Install the unit to the system
-	_ = unit.Uninstall(context.Background())
+	_ = unit.Delete(context.Background())
 
 	fmt.Println("Unit uninstalled")
 
 	// Output:
 	// Unit installed
+	// Unit enabled
 	// Unit uninstalled
 }

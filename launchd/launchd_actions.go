@@ -12,7 +12,7 @@ import (
 	"github.com/holyhope/god"
 )
 
-func (u *Unit) Install(ctx context.Context) error {
+func (u *Unit) Create(ctx context.Context) error {
 	if err := u.writeUnitFile(u.unitPath); err != nil {
 		return fmt.Errorf("write unit file: %w", err)
 	}
@@ -30,7 +30,7 @@ func (u *Unit) Install(ctx context.Context) error {
 	return nil
 }
 
-func (u *Unit) Uninstall(ctx context.Context) error {
+func (u *Unit) Delete(ctx context.Context) error {
 	_, err := u.exec(ctx, u.launchctlPath, "bootout", u.domain, u.unitPath)
 	if err != nil {
 		if err, ok := err.(*ExecError); ok {
@@ -49,11 +49,28 @@ func (u *Unit) Uninstall(ctx context.Context) error {
 	return nil
 }
 
-func (u *Unit) Reload(ctx context.Context) error {
-	if err := u.Uninstall(ctx); err != nil {
+func (u *Unit) Enable(ctx context.Context) error {
+	if _, err := u.exec(ctx, u.launchctlPath, "enable", fmt.Sprintf("%s/%s", u.domain, u.unitName)); err != nil {
+		if err, ok := err.(*ExecError); ok {
+			if err.MatchLaunchdReason("service already enabled") {
+				return nil
+			}
+		}
+
 		return err
 	}
-	if err := u.Install(ctx); err != nil {
+
+	return nil
+}
+
+func (u *Unit) Disable(ctx context.Context) error {
+	if _, err := u.exec(ctx, u.launchctlPath, "disable", fmt.Sprintf("%s/%s", u.domain, u.unitName)); err != nil {
+		if err, ok := err.(*ExecError); ok {
+			if err.MatchLaunchdReason("service already disabled") {
+				return nil
+			}
+		}
+
 		return err
 	}
 

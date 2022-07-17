@@ -6,10 +6,14 @@ import (
 
 // Unit represents single service managed by either systemd or launchd.
 type Unit interface {
-	// Install the unit to the system.
-	Install(ctx context.Context) error
-	// Uninstall the unit from the system.
-	Uninstall(ctx context.Context) error
+	// Create the unit to the system.
+	Create(ctx context.Context) error
+	// Enable the unit.
+	Enable(ctx context.Context) error
+	// Delete the unit from the system.
+	Delete(ctx context.Context) error
+	// Disable the unit.
+	Disable(ctx context.Context) error
 	// Status the status of the unit.
 	Status(ctx context.Context) (UnitStatus, error)
 }
@@ -17,6 +21,6 @@ type Unit interface {
 type UnitStatus interface {
 	// Exists returns true if the unit is on the filesystem.
 	Exists(ctx context.Context) bool
-	// IsLoaded returns true if the unit is loaded.
-	IsLoaded(ctx context.Context) bool
+	// IsEnabled returns true if the unit is enable.
+	IsEnabled(ctx context.Context) bool
 }

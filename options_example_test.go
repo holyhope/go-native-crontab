@@ -15,8 +15,9 @@ func ExampleOptions() {
 			WithScope(god.ScopeUser),
 	)
 
-	_ = u.Install(context.Background())
+	_ = u.Create(context.Background())
+	_ = u.Enable(context.Background())
 
 	// Cleanup filesystem
-	_ = u.Uninstall(context.Background())
+	_ = u.Delete(context.Background())
 }
