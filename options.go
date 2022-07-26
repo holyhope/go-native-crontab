@@ -9,20 +9,20 @@ type Options interface {
 	DarwinOptions
 
 	nameOption
+	scopeOption
 	stateOption
-	descriptionOption
 	programOption
+	intervalOption
 	argumentsOption
 	runAtLoadOption
-	environmentVariablesOption
-	scopeOption
-	intervalOption
 	userOwnerOption
 	groupOwnerOption
-	workingDirectoryOption
-	standardOutputOption
+	descriptionOption
 	errorOutputOption
+	standardOutputOption
+	workingDirectoryOption
 	startLimitIntervalOption
+	environmentVariablesOption
 }
 
 func Opts() Options {
@@ -37,39 +37,40 @@ type options struct {
 	darwin darwinOptions
 
 	name                 *string
+	scope                *Scope
 	state                *State
-	description          *string
 	program              *string
+	interval             *time.Duration
 	arguments            *[]string
 	runAtLoad            *bool
-	environmentVariables *map[string]string
-	scope                *Scope
-	interval             *time.Duration
 	userOwner            *int
 	groupOwner           *int
-	workingDirectory     *string
-	standardOutput       *string
+	description          *string
 	errorOutput          *string
+	standardOutput       *string
+	workingDirectory     *string
 	startLimitInterval   *time.Duration
+	environmentVariables *map[string]string
 }
 
 func (opts *options) copy() *options {
 	return &options{
-		darwin:               *opts.darwin.copy(),
 		name:                 opts.name,
+		scope:                opts.scope,
 		state:                opts.state,
-		description:          opts.description,
+		darwin:               *opts.darwin.copy(),
 		program:              opts.program,
+		interval:             opts.interval,
 		arguments:            opts.arguments,
 		runAtLoad:            opts.runAtLoad,
-		environmentVariables: opts.environmentVariables,
-		scope:                opts.scope,
-		interval:             opts.interval,
 		userOwner:            opts.userOwner,
 		groupOwner:           opts.groupOwner,
-		workingDirectory:     opts.workingDirectory,
-		standardOutput:       opts.standardOutput,
+		description:          opts.description,
 		errorOutput:          opts.errorOutput,
+		standardOutput:       opts.standardOutput,
+		workingDirectory:     opts.workingDirectory,
+		startLimitInterval:   opts.startLimitInterval,
+		environmentVariables: opts.environmentVariables,
 	}
 }
 
