@@ -95,3 +95,7 @@ func (u launchUnit) EnvironmentVariables(value map[string]string) {
 func (u launchUnit) LimitLoadSessionType(value string) {
 	u[C.LAUNCH_JOBKEY_LIMITLOADTOSESSIONTYPE] = value
 }
+
+func (u launchUnit) ThrottleInterval(value int) {
+	u[C.LAUNCH_JOBKEY_THROTTLEINTERVAL] = value
+}

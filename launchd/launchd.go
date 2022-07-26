@@ -78,6 +78,10 @@ func New(ctx context.Context, opts god.Options) (god.Unit, error) {
 	if opts.HasEnvironmentVariables() {
 		launchU.EnvironmentVariables(opts.EnvironmentVariables())
 	}
+	if opts.HasStartLimitInterval() {
+		launchU.ThrottleInterval(int(opts.StartLimitInterval().Seconds()))
+	}
+
 	if opts.HasUserOwner() {
 		username, err := Username(opts)
 		if err != nil {

@@ -22,6 +22,7 @@ type Options interface {
 	workingDirectoryOption
 	standardOutputOption
 	errorOutputOption
+	startLimitIntervalOption
 }
 
 func Opts() Options {
@@ -49,6 +50,7 @@ type options struct {
 	workingDirectory     *string
 	standardOutput       *string
 	errorOutput          *string
+	startLimitInterval   *time.Duration
 }
 
 func (opts *options) copy() *options {
