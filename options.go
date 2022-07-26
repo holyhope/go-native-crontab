@@ -19,6 +19,7 @@ type Options interface {
 	groupOwnerOption
 	descriptionOption
 	errorOutputOption
+	watchingFilesOption
 	standardOutputOption
 	workingDirectoryOption
 	startLimitIntervalOption
@@ -47,6 +48,7 @@ type options struct {
 	groupOwner           *int
 	description          *string
 	errorOutput          *string
+	watchingFiles        *[]string
 	standardOutput       *string
 	workingDirectory     *string
 	startLimitInterval   *time.Duration
@@ -67,6 +69,7 @@ func (opts *options) copy() *options {
 		groupOwner:           opts.groupOwner,
 		description:          opts.description,
 		errorOutput:          opts.errorOutput,
+		watchingFiles:        opts.watchingFiles,
 		standardOutput:       opts.standardOutput,
 		workingDirectory:     opts.workingDirectory,
 		startLimitInterval:   opts.startLimitInterval,

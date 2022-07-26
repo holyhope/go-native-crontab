@@ -99,3 +99,7 @@ func (u launchUnit) LimitLoadSessionType(value string) {
 func (u launchUnit) ThrottleInterval(value int) {
 	u[C.LAUNCH_JOBKEY_THROTTLEINTERVAL] = value
 }
+
+func (u launchUnit) WatchPaths(value ...string) {
+	u[C.LAUNCH_JOBKEY_WATCHPATHS] = value
+}

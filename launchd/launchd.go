@@ -81,6 +81,9 @@ func New(ctx context.Context, opts god.Options) (god.Unit, error) {
 	if opts.HasStartLimitInterval() {
 		launchU.ThrottleInterval(int(opts.StartLimitInterval().Seconds()))
 	}
+	if opts.HasWatchingFiles() {
+		launchU.WatchPaths(opts.WatchingFiles()...)
+	}
 
 	if opts.HasUserOwner() {
 		username, err := Username(opts)
