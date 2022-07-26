@@ -10,6 +10,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path"
 
 	"github.com/holyhope/god"
 	"howett.net/plist"
@@ -54,9 +55,16 @@ func New(ctx context.Context, opts god.Options) (god.Unit, error) {
 	}
 
 	launchU.KeepAlive(false)
+
+	// Prepend program name to arguments.
+	// See execvp(3) which provide an array of pointers to null-terminated strings that represent the argument list available to the new program.
+	// The first argument, by convention, should point to the file name associated with the file being executed.
 	if opts.HasArguments() {
-		launchU.ProgramArguments(opts.Arguments()...)
+		launchU.ProgramArguments(append([]string{path.Base(opts.Program())}, opts.Arguments()...)...)
+	} else {
+		launchU.ProgramArguments(path.Base(opts.Program()))
 	}
+
 	if opts.HasRunAtLoad() {
 		launchU.RunAtLoad(opts.RunAtLoad())
 	}

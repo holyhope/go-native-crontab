@@ -12,6 +12,7 @@
         <string>/bin/bash</string>
         <key>ProgramArguments</key>
         <array>
+            <string>bash</string>
             <string>-c</string>
             <string>echo &#39;Hello, world!&#39;</string>
         </array>
