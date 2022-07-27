@@ -40,7 +40,7 @@ func Example() {
 
 	fmt.Println("Unit enabled")
 
-	// Install the unit to the system
+	// Delete the unit to the system
 	_ = unit.Delete(context.Background())
 
 	fmt.Println("Unit uninstalled")

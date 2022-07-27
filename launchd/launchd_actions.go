@@ -1,6 +1,3 @@
-//go:build darwin && !linux && !freebsd && !netbsd && !openbsd && !windows && !js
-// +build darwin,!linux,!freebsd,!netbsd,!openbsd,!windows,!js
-
 package launchd
 
 import (

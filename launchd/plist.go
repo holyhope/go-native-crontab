@@ -1,6 +1,3 @@
-//go:build darwin && !linux && !freebsd && !netbsd && !openbsd && !windows && !js
-// +build darwin,!linux,!freebsd,!netbsd,!openbsd,!windows,!js
-
 package launchd
 
 // // See file:///Applications/Xcode.app/Contents/Developer//Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/launch.h
