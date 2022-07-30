@@ -9,6 +9,8 @@ import (
 	"os/exec"
 	"os/user"
 	"path"
+	"runtime"
+	"strings"
 	"time"
 
 	_ "embed"
@@ -43,6 +45,15 @@ func CurlPath() string {
 	Expect(err).ToNot(HaveOccurred())
 
 	return path
+}
+
+func SkipOSRequiresRoot(os string) {
+	currentUser, err := user.Current()
+	Expect(err).ToNot(HaveOccurred())
+
+	if strings.HasPrefix(runtime.GOOS, os) && currentUser.Uid != "0" {
+		Skip("This test requires root privileges")
+	}
 }
 
 func NewSuite(factory func(ctx context.Context, opts god.Options) (god.Unit, error)) {
@@ -100,12 +111,7 @@ func NewSuite(factory func(ctx context.Context, opts god.Options) (god.Unit, err
 			})
 
 			It("Can be created multiple times", func() {
-				currentUser, err := user.Current()
-				Expect(err).ToNot(HaveOccurred())
-
-				if currentUser.Uid != "0" {
-					Skip("This test requires root privileges")
-				}
+				SkipOSRequiresRoot("darwin")
 
 				Ω(unit.Create(context.Background())).Should(Succeed())
 				Ω(unit.Create(context.Background())).Should(Succeed())
@@ -230,12 +236,7 @@ func NewSuite(factory func(ctx context.Context, opts god.Options) (god.Unit, err
 			})
 
 			It("Can be enabled multiple times", func() {
-				currentUser, err := user.Current()
-				Expect(err).ToNot(HaveOccurred())
-
-				if currentUser.Uid != "0" {
-					Skip("This test requires root privileges")
-				}
+				SkipOSRequiresRoot("darwin")
 
 				Ω(unit.Enable(context.Background())).Should(Succeed())
 				Ω(unit.Enable(context.Background())).Should(Succeed())
@@ -294,12 +295,7 @@ func NewSuite(factory func(ctx context.Context, opts god.Options) (god.Unit, err
 			})
 
 			It("Can be enabled multiple times", func() {
-				currentUser, err := user.Current()
-				Expect(err).ToNot(HaveOccurred())
-
-				if currentUser.Uid != "0" {
-					Skip("This test requires root privileges")
-				}
+				SkipOSRequiresRoot("darwin")
 
 				Ω(unit.Disable(context.Background())).Should(Succeed())
 				Ω(unit.Disable(context.Background())).Should(Succeed())
@@ -322,12 +318,7 @@ func NewSuite(factory func(ctx context.Context, opts god.Options) (god.Unit, err
 			})
 
 			It("Can be enabled multiple times", func() {
-				currentUser, err := user.Current()
-				Expect(err).ToNot(HaveOccurred())
-
-				if currentUser.Uid != "0" {
-					Skip("This test requires root privileges")
-				}
+				SkipOSRequiresRoot("darwin")
 
 				Ω(unit.Disable(context.Background())).Should(Succeed())
 				Ω(unit.Disable(context.Background())).Should(Succeed())
@@ -454,12 +445,7 @@ func NewSuite(factory func(ctx context.Context, opts god.Options) (god.Unit, err
 
 		Context("without installation", func() {
 			It("should work", func() {
-				currentUser, err := user.Current()
-				Expect(err).ToNot(HaveOccurred())
-
-				if currentUser.Uid != "0" {
-					Skip("This test requires root privileges")
-				}
+				SkipOSRequiresRoot("darwin")
 
 				Ω(unit.Delete(context.Background())).Should(Succeed())
 			})
