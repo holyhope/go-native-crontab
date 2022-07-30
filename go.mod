@@ -3,6 +3,7 @@ module github.com/holyhope/god
 go 1.18
 
 require (
+	github.com/coreos/go-systemd/v22 v22.3.2
 	github.com/iancoleman/strcase v0.2.0
 	github.com/onsi/ginkgo/v2 v2.1.4
 	github.com/onsi/gomega v1.20.0
@@ -10,6 +11,7 @@ require (
 )
 
 require (
+	github.com/godbus/dbus/v5 v5.0.4 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/kr/text v0.2.0 // indirect
